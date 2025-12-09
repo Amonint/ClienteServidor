@@ -65,10 +65,14 @@ ClienteServidor/
 
 ## 🚀 Requisitos Previos
 
+### Todos los Sistemas Operativos
 - PHP 7.4 o superior
 - PostgreSQL 12 o superior
-- Servidor web (Apache/Nginx) o PHP built-in server
 - Extensión PDO de PHP habilitada
+
+### Específico por Sistema
+- **Linux/macOS**: Servidor web (Apache/Nginx) o PHP built-in server
+- **Windows**: XAMPP, WAMP, o PHP built-in server
 
 ## 📦 Instalación
 
@@ -108,7 +112,7 @@ psql -U postgres -d gimnasio_db -f database/schema.sql
 
 ### 4. Configurar el servidor web
 
-#### Opción A: Usar el script run.sh (Recomendado)
+#### Opción A: Usar el script run.sh (Linux/macOS)
 
 ```bash
 # Desde la raíz del proyecto
@@ -117,12 +121,23 @@ psql -U postgres -d gimnasio_db -f database/schema.sql
 
 El script verifica automáticamente los requisitos e inicia el servidor.
 
-#### Opción B: Servidor PHP built-in (manual)
+#### Opción B: Servidor PHP built-in (Todos los sistemas)
 
+**Linux/macOS:**
 ```bash
 cd public
 php -S localhost:8000
 ```
+
+**Windows (PowerShell o CMD):**
+```cmd
+cd public
+php -S localhost:8000
+```
+
+**Windows (XAMPP/WAMP):**
+1. Copia el proyecto a `C:\xampp\htdocs\gimnasio` (o `C:\wamp64\www\gimnasio`)
+2. Accede a: `http://localhost/gimnasio/public/index.php`
 
 Accede a: `http://localhost:8000/index.php`
 
@@ -206,6 +221,14 @@ Consulta `GUIA_ESTUDIANTE.md` para:
 - Código completo para cada paso
 - Ejercicios prácticos
 
+## 🪟 Instalación en Windows
+
+Si estás usando Windows, consulta `INSTALACION_WINDOWS.md` para:
+- Instalación paso a paso de PHP y PostgreSQL
+- Configuración con XAMPP/WAMP
+- Solución de problemas comunes en Windows
+- Instrucciones específicas para Windows
+
 ## 🔒 DevSecOps
 
 El proyecto incluye un pipeline completo de DevSecOps con GitHub Actions:
@@ -244,9 +267,11 @@ Consulta `DESPLIEGUE_DOS_NODOS.md` para instrucciones completas de configuració
 ## 🐛 Solución de Problemas
 
 ### Error de conexión a la base de datos
-- Verifica que PostgreSQL esté ejecutándose
+- **Linux/macOS**: Verifica que PostgreSQL esté ejecutándose (`pg_isready`)
+- **Windows**: Verifica el servicio PostgreSQL en "Services" (`services.msc`)
 - Confirma las credenciales en `config/database.php`
 - Asegúrate de que la base de datos `gimnasio_db` exista
+- **Windows**: Verifica que la extensión `pdo_pgsql` esté habilitada en `php.ini`
 
 ### Página en blanco
 - Verifica los logs de PHP
@@ -256,6 +281,7 @@ Consulta `DESPLIEGUE_DOS_NODOS.md` para instrucciones completas de configuració
 ### Estilos no se cargan
 - Verifica que la ruta `/assets/css/style.css` sea accesible
 - Confirma la configuración del servidor web
+- **Windows**: Verifica que los archivos estén en la ruta correcta (rutas con barras `/` o `\`)
 
 ## 📄 Licencia
 
@@ -263,8 +289,7 @@ Este proyecto es educativo y está diseñado para fines de enseñanza.
 
 ## 👥 Autor
 
-Sistema desarrollado para demostrar arquitectura Cliente-Servidor y patrón MVC.
-
+@xavicrip
 ---
 
 **Para más información, consulta `GUIA_ESTUDIANTE.md`**

@@ -8,24 +8,56 @@ Asegúrate de tener instalado:
 - ✅ Extensión PDO de PHP habilitada
 
 ### Verificar PHP
+
+**Linux/macOS:**
 ```bash
 php -v
 ```
 
+**Windows (CMD o PowerShell):**
+```cmd
+php -v
+```
+
 ### Verificar PostgreSQL
+
+**Linux/macOS:**
 ```bash
 psql --version
 ```
 
+**Windows:**
+```cmd
+psql --version
+```
+O desde el menú de inicio busca "SQL Shell (psql)"
+
 ### Verificar extensión PDO
+
+**Linux/macOS:**
 ```bash
 php -m | grep pdo_pgsql
+```
+
+**Windows (CMD):**
+```cmd
+php -m | findstr pdo_pgsql
+```
+
+**Windows (PowerShell):**
+```powershell
+php -m | Select-String pdo_pgsql
 ```
 
 Si no aparece `pdo_pgsql`, necesitas instalarlo:
 - **macOS**: `brew install php-pgsql`
 - **Linux**: `sudo apt-get install php-pgsql` o `sudo yum install php-pgsql`
-- **Windows**: Edita `php.ini` y descomenta `extension=pdo_pgsql`
+- **Windows**: 
+  1. Abre `php.ini` (ubicado en la carpeta de PHP, ej: `C:\php\php.ini`)
+  2. Busca la línea `;extension=pdo_pgsql`
+  3. Quita el punto y coma: `extension=pdo_pgsql`
+  4. Guarda el archivo
+  5. Reinicia el servidor web (Apache/Nginx) o XAMPP/WAMP
 
 ## Paso 2: Configurar la Base de Datos
 
@@ -41,10 +73,11 @@ private const DB_PASS = 'tu_contraseña';  // Tu contraseña de PostgreSQL
 private const DB_PORT = '5432';            // Puerto (por defecto 5432)
 ```
 
+**Nota Windows**: Si instalaste PostgreSQL con el instalador estándar, el usuario por defecto es `postgres` y la contraseña es la que configuraste durante la instalación.
+
 ### 2.2. Crear la base de datos
 
-Abre una terminal y ejecuta:
-
+**Linux/macOS:**
 ```bash
 # Opción 1: Usando psql directamente
 psql -U postgres
@@ -57,18 +90,61 @@ CREATE DATABASE gimnasio_db;
 createdb -U postgres gimnasio_db
 ```
 
+**Windows (CMD o PowerShell):**
+```cmd
+# Opción 1: Usando psql directamente
+psql -U postgres
+
+# Dentro de psql, ejecuta:
+CREATE DATABASE gimnasio_db;
+\q
+
+# Opción 2: Usando pgAdmin (GUI)
+# 1. Abre pgAdmin 4
+# 2. Conecta al servidor PostgreSQL
+# 3. Click derecho en "Databases" → Create → Database
+# 4. Nombre: gimnasio_db
+# 5. Click en "Save"
+```
+
 ### 2.3. Ejecutar el script SQL
 
+**Linux/macOS:**
 ```bash
 # Desde la raíz del proyecto
 psql -U postgres -d gimnasio_db -f database/schema.sql
 ```
 
+**Windows (CMD):**
+```cmd
+# Desde la raíz del proyecto
+psql -U postgres -d gimnasio_db -f database\schema.sql
+```
+
+**Windows (PowerShell):**
+```powershell
+# Desde la raíz del proyecto
+psql -U postgres -d gimnasio_db -f database\schema.sql
+```
+
+**Windows (pgAdmin):**
+1. Abre pgAdmin 4
+2. Conecta al servidor PostgreSQL
+3. Expande `gimnasio_db` → Click derecho → Query Tool
+4. Abre el archivo `database/schema.sql`
+5. Ejecuta el script (F5 o botón Execute)
+
 **Nota**: Si te pide contraseña, ingrésala cuando se solicite.
 
 ### 2.4. Verificar que las tablas se crearon
 
+**Linux/macOS:**
 ```bash
+psql -U postgres -d gimnasio_db -c "\dt"
+```
+
+**Windows:**
+```cmd
 psql -U postgres -d gimnasio_db -c "\dt"
 ```
 
@@ -76,7 +152,7 @@ Deberías ver las tablas: `members`, `classes`, `membership_types`, `payments`
 
 ## Paso 3: Iniciar el Servidor
 
-### Opción A: Usar el script run.sh (Recomendado - Más fácil)
+### Opción A: Usar el script run.sh (Linux/macOS - Recomendado)
 
 ```bash
 # Desde la raíz del proyecto
@@ -94,8 +170,9 @@ El script automáticamente:
 - ✅ Verifica que PostgreSQL esté ejecutándose
 - ✅ Inicia el servidor en el puerto especificado (por defecto 8000)
 
-### Opción B: Servidor PHP Built-in (Manual)
+### Opción B: Servidor PHP Built-in (Todos los sistemas)
 
+**Linux/macOS:**
 ```bash
 # Navega a la carpeta public
 cd public
@@ -103,6 +180,38 @@ cd public
 # Inicia el servidor
 php -S localhost:8000
 ```
+
+**Windows (CMD):**
+```cmd
+# Navega a la carpeta public
+cd public
+
+# Inicia el servidor
+php -S localhost:8000
+```
+
+**Windows (PowerShell):**
+```powershell
+# Navega a la carpeta public
+cd public
+
+# Inicia el servidor
+php -S localhost:8000
+```
+
+### Opción C: Usar XAMPP/WAMP (Windows)
+
+**Con XAMPP:**
+1. Copia el proyecto a `C:\xampp\htdocs\gimnasio`
+2. Inicia Apache desde el Panel de Control de XAMPP
+3. Accede a: `http://localhost/gimnasio/public/index.php`
+
+**Con WAMP:**
+1. Copia el proyecto a `C:\wamp64\www\gimnasio`
+2. Inicia WAMP (debe estar en verde)
+3. Accede a: `http://localhost/gimnasio/public/index.php`
+
+**Nota**: Asegúrate de que PHP tenga habilitada la extensión `pdo_pgsql` en `php.ini`
 
 Verás un mensaje como:
 ```

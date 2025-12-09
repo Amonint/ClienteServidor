@@ -34,17 +34,22 @@ Esta guía explica cómo configurar la aplicación con el **CLIENTE** y el **SER
 ## 📦 Configuración del NODO 1: CLIENTE
 
 ### Requisitos
-- Nginx o Apache
+- **Linux/macOS**: Nginx o Apache
+- **Windows**: IIS, Apache (XAMPP), o Nginx
 - Acceso HTTP/HTTPS
 
 ### Paso 1: Ejecutar script de despliegue
 
+**Linux/macOS:**
 ```bash
 # El script detecta automáticamente el sistema operativo
 ./deploy-cliente.sh 192.168.1.20
 
 # Donde 192.168.1.20 es la IP del NODO 2 (Servidor)
 ```
+
+**Windows:**
+El script `deploy-cliente.sh` no está disponible para Windows. Sigue los pasos manuales a continuación.
 
 **Nota**: El script detecta automáticamente:
 - **macOS**: Usa usuario `_www`
@@ -91,7 +96,7 @@ server {
 
 ### Paso 3: Configurar Apache (Alternativa)
 
-**Archivo: `/etc/apache2/sites-available/gimnasio-cliente.conf`**
+**Linux/macOS - Archivo: `/etc/apache2/sites-available/gimnasio-cliente.conf`**
 
 ```apache
 <VirtualHost *:80>
@@ -115,15 +120,50 @@ server {
 </VirtualHost>
 ```
 
+**Windows - XAMPP/WAMP:**
+
+1. **Copiar archivos del cliente:**
+   - Copia `public/assets` a `C:\xampp\htdocs\gimnasio-cliente\assets`
+   - Crea `C:\xampp\htdocs\gimnasio-cliente\index.html` (ver ejemplo en script deploy-cliente.sh)
+
+2. **Configurar Apache (XAMPP):**
+   Edita `C:\xampp\apache\conf\httpd.conf`:
+   ```apache
+   <Directory "C:/xampp/htdocs/gimnasio-cliente">
+       Options Indexes FollowSymLinks
+       AllowOverride All
+       Require all granted
+   </Directory>
+   ```
+
+3. **Habilitar módulos necesarios:**
+   En `httpd.conf`, descomenta:
+   ```apache
+   LoadModule headers_module modules/mod_headers.so
+   LoadModule proxy_module modules/mod_proxy.so
+   LoadModule proxy_http_module modules/mod_proxy_http.so
+   ```
+
+4. **Configurar CORS:**
+   Crea `.htaccess` en `C:\xampp\htdocs\gimnasio-cliente\`:
+   ```apache
+   Header set Access-Control-Allow-Origin "http://192.168.1.20"
+   Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+   Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+   ```
+
 ## 📦 Configuración del NODO 2: SERVIDOR
 
 ### Requisitos
-- PHP 7.4+ con PHP-FPM
+- **Linux/macOS**: PHP 7.4+ con PHP-FPM
+- **Windows**: PHP 7.4+ (con XAMPP/WAMP o IIS)
 - PostgreSQL
-- Nginx o Apache
+- **Linux/macOS**: Nginx o Apache
+- **Windows**: IIS, Apache (XAMPP/WAMP), o Nginx
 
 ### Paso 1: Ejecutar script de despliegue
 
+**Linux/macOS:**
 ```bash
 # El script detecta automáticamente el sistema operativo
 ./deploy-servidor.sh 192.168.1.10
@@ -131,8 +171,12 @@ server {
 # Donde 192.168.1.10 es la IP del NODO 1 (Cliente)
 ```
 
+**Windows:**
+El script `deploy-servidor.sh` no está disponible para Windows. Sigue los pasos manuales a continuación o consulta `INSTALACION_WINDOWS.md`.
+
 ### Paso 2: Instalar PHP-FPM
 
+**Linux:**
 ```bash
 # Ubuntu/Debian
 sudo apt-get update
@@ -140,10 +184,17 @@ sudo apt-get install php-fpm php-pgsql php-mbstring
 
 # CentOS/RHEL
 sudo yum install php-fpm php-pgsql php-mbstring
+```
 
-# macOS (con Homebrew)
+**macOS:**
+```bash
 brew install php
 ```
+
+**Windows:**
+- PHP viene incluido con XAMPP/WAMP
+- O instala PHP manualmente desde https://windows.php.net/
+- Asegúrate de habilitar `pdo_pgsql` y `pgsql` en `php.ini`
 
 ### Paso 3: Configurar Nginx para PHP-FPM
 
@@ -194,7 +245,7 @@ server {
 
 ### Paso 4: Configurar Apache para PHP
 
-**Archivo: `/etc/apache2/sites-available/gimnasio-servidor.conf`**
+**Linux/macOS - Archivo: `/etc/apache2/sites-available/gimnasio-servidor.conf`**
 
 ```apache
 <VirtualHost *:80>
@@ -223,6 +274,42 @@ server {
     </DirectoryMatch>
 </VirtualHost>
 ```
+
+**Windows - XAMPP/WAMP:**
+
+1. **Copiar proyecto:**
+   - Copia todo el proyecto a `C:\xampp\htdocs\gimnasio-servidor\`
+
+2. **Configurar Apache:**
+   Edita `C:\xampp\apache\conf\httpd.conf`:
+   ```apache
+   <Directory "C:/xampp/htdocs/gimnasio-servidor/public">
+       Options -Indexes +FollowSymLinks
+       AllowOverride All
+       Require all granted
+   </Directory>
+   ```
+
+3. **Habilitar módulos:**
+   ```apache
+   LoadModule headers_module modules/mod_headers.so
+   ```
+
+4. **Configurar CORS:**
+   Crea `.htaccess` en `C:\xampp\htdocs\gimnasio-servidor\public\`:
+   ```apache
+   Header set Access-Control-Allow-Origin "http://192.168.1.10"
+   Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+   Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+   
+   RewriteEngine On
+   RewriteCond %{REQUEST_FILENAME} !-f
+   RewriteCond %{REQUEST_FILENAME} !-d
+   RewriteRule ^(.*)$ index.php [QSA,L]
+   ```
+
+5. **Acceder:**
+   - `http://localhost/gimnasio-servidor/public/index.php`
 
 ### Paso 5: Configurar PostgreSQL
 
@@ -267,6 +354,7 @@ class Database {
 
 ### En NODO 1 (Cliente):
 
+**Linux/macOS:**
 ```bash
 # 1. Ejecutar script de despliegue
 ./deploy-cliente.sh 192.168.1.20
@@ -279,8 +367,17 @@ sudo nginx -t && sudo systemctl reload nginx
 curl http://localhost
 ```
 
+**Windows:**
+```cmd
+# 1. Copiar archivos del cliente a C:\xampp\htdocs\gimnasio-cliente\
+# 2. Configurar Apache según instrucciones anteriores
+# 3. Reiniciar Apache desde XAMPP Control Panel
+# 4. Verificar: http://localhost/gimnasio-cliente/
+```
+
 ### En NODO 2 (Servidor):
 
+**Linux/macOS:**
 ```bash
 # 1. Ejecutar script de despliegue
 ./deploy-servidor.sh 192.168.1.10
@@ -294,6 +391,15 @@ sudo systemctl restart php8.1-fpm
 
 # 4. Verificar
 curl http://localhost/index.php?controller=member&action=index
+```
+
+**Windows:**
+```cmd
+# 1. Copiar proyecto a C:\xampp\htdocs\gimnasio-servidor\
+# 2. Configurar base de datos (ver INSTALACION_WINDOWS.md)
+# 3. Configurar Apache según instrucciones anteriores
+# 4. Reiniciar Apache desde XAMPP Control Panel
+# 5. Verificar: http://localhost/gimnasio-servidor/public/index.php
 ```
 
 ## 🔧 Configuración de Red
