@@ -49,6 +49,21 @@ CREATE TABLE IF NOT EXISTS payments (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS cleaning_schedules (
+    id SERIAL PRIMARY KEY,
+    area VARCHAR(100) NOT NULL,
+    assigned_staff VARCHAR(100) NOT NULL,
+    cleaning_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    status VARCHAR(20) DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'completed', 'cancelled')),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS cleaning_schedules_area_date_start_time_uniq
+    ON cleaning_schedules (area, cleaning_date, start_time);
+
 -- Insertar datos de ejemplo para tipos de membresía
 INSERT INTO membership_types (name, price, duration_days, description) VALUES
     ('Mensual', 50.00, 30, 'Membresía mensual estándar'),
@@ -69,3 +84,8 @@ INSERT INTO classes (name, instructor, schedule_time, schedule_days, capacity, d
     ('Pilates', 'Laura Sánchez', '10:00:00', 'Lunes, Miércoles, Viernes', 18, 'Clase de pilates para fortalecimiento')
 ON CONFLICT DO NOTHING;
 
+INSERT INTO cleaning_schedules (area, assigned_staff, cleaning_date, start_time, end_time, status, notes) VALUES
+    ('Sala de pesas', 'Equipo Limpieza', CURRENT_DATE, '06:00:00', '07:00:00', 'scheduled', 'Limpieza antes de apertura'),
+    ('Baños', 'Equipo Limpieza', CURRENT_DATE, '12:00:00', '12:30:00', 'scheduled', 'Revisión de insumos'),
+    ('Recepción', 'Equipo Limpieza', CURRENT_DATE, '20:00:00', '20:30:00', 'scheduled', 'Limpieza al cierre')
+ON CONFLICT (area, cleaning_date, start_time) DO NOTHING;
